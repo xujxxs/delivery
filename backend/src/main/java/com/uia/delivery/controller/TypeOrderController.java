@@ -31,9 +31,11 @@ public class TypeOrderController
     public ResponseEntity<List<TypeOrder>> getTypesOrder() 
     {
         log.info("GET '/api/type-order'");
+        List<TypeOrder> typeOrders = typeOrderService.getTypesOrder();
+        log.debug("Getted List<TypeOrder> size: {}", typeOrders.size());
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(typeOrderService.getTypesOrder());
+                .body(typeOrders);
     }
     
 }
