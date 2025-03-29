@@ -31,12 +31,12 @@ public class TypeOrderService
     public TypeOrder safetySaveType(TypeOrder typeOrder)
     {
         log.debug("Safety save type orders from TypeOrder: {}", typeOrder);
-        List<TypeOrder> savedTypeOrder = safetySaveTypes(List.of(typeOrder));
-        if(savedTypeOrder == null || savedTypeOrder.isEmpty())
+        if(typeOrder == null)
         {
             log.error("Error: empty type order");
             throw new NullFieldException("Type order");
         }
+        List<TypeOrder> savedTypeOrder = safetySaveTypes(List.of(typeOrder));
         log.debug("Safety saved TypeOrder: {}", savedTypeOrder.get(0));
         return savedTypeOrder.get(0);
     }
