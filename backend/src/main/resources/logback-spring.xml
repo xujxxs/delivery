@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <property name="LOGS" value="./logs" />
+    <timestamp key="currentDate" datePattern="yyyy-MM-dd_HH:mm:ss" />
+
+    <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%gray(%d{yyyy-MM-dd HH:mm:ss}) [%thread] %highlight(%-5level) %cyan(%logger{36}) - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="Latest" class="ch.qos.logback.core.FileAppender">
+        <file>${LOGS}/latest.log</file>
+        <append>false</append>
+        <encoder
+            class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="Archived" class="ch.qos.logback.core.FileAppender">
+        <file>${LOGS}/archived/main_${currentDate}.log</file>
+        <append>false</append>
+        <encoder
+            class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    
+    <root level="info">
+        <appender-ref ref="Console" />
+        <appender-ref ref="Latest" />
+        <appender-ref ref="Archived" />
+    </root>
+
+    <logger name="com.uia" level="debug" additivity="false">
+        <appender-ref ref="Console" />
+        <appender-ref ref="Latest" />
+        <appender-ref ref="Archived" />
+    </logger>
+
+</configuration>
