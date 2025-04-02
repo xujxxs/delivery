@@ -3,6 +3,8 @@ package com.uia.delivery.entity;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.uia.delivery.entity.subsidiary.Coordinates;
@@ -19,12 +21,16 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Schedule 
 {
     @Id
@@ -36,10 +42,12 @@ public class Schedule
 
     @ManyToOne
     @JoinColumn(name = "courier_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Courier courier;
 
     @ManyToOne
     @JoinColumn(name = "delivery_order_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private DeliveryOrder deliveryOrder;
 
     @Column(nullable = false)

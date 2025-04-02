@@ -12,6 +12,7 @@ import com.uia.delivery.entity.subsidiary.TypeOrder;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -50,7 +51,7 @@ public class Courier
     @Column(nullable = false)
     private Integer loadCapacity; // Measured in grams
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "supported_courier_order_types",
         joinColumns = @JoinColumn(name = "courier_id"),

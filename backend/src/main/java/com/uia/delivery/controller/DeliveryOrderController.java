@@ -3,6 +3,7 @@ package com.uia.delivery.controller;
 import java.net.URI;
 
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.uia.delivery.controller.filter.OrderFilter;
 import com.uia.delivery.controller.filter.SortParams;
@@ -122,5 +124,27 @@ public class DeliveryOrderController
         deliveryOrderService.deleteOrder(orderId);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> exportJSON()
+    {
+        log.info("GET '/api/order/export'");
+        byte[] exportFile = deliveryOrderService.exportAllOrders();
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=orders.json")
+                .header(HttpHeaders.CONTENT_TYPE, "application/json")
+                .body(exportFile);
+    }
+
+    @PostMapping("/import")
+    public ResponseEntity<String> importJSON(@RequestParam("file") MultipartFile file) 
+    {
+        log.info("POST '/api/order/import'");
+        deliveryOrderService.importOrders(file);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("File successfully imported.");
     }
 }

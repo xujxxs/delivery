@@ -59,6 +59,10 @@ public class DeliveryOrder
     @AttributeOverride(name = "y", column = @Column(name = "delivery_y"))
     private Coordinates positionDelivery;
 
+    @ManyToOne
+    @JoinColumn(name = "courier_id", nullable = true)
+    private Courier assignedCourier;
+
     @CreationTimestamp
     @Column(nullable = false)
     private LocalDateTime createdAt;
