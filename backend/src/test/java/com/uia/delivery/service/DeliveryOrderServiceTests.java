@@ -3,11 +3,19 @@ package com.uia.delivery.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,21 +32,36 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.uia.delivery.akka.message.DispatcherMessage;
 import com.uia.delivery.controller.filter.OrderFilter;
 import com.uia.delivery.controller.filter.SortParams;
+import com.uia.delivery.dto.OrdersJsonResponse;
 import com.uia.delivery.entity.DeliveryOrder;
+import com.uia.delivery.exception.ExportException;
+import com.uia.delivery.exception.ImportException;
 import com.uia.delivery.exception.NotFoundException;
 import com.uia.delivery.repository.DeliveryOrderRepository;
+
+import akka.actor.ActorRef;
 
 @ExtendWith(MockitoExtension.class)
 class DeliveryOrderServiceTests 
 {
     @Mock
+    private ActorRef dispatcherManager;
+
+    @Mock
     private DeliveryOrderRepository deliveryOrderRepository;
 
     @Mock
     private TypeOrderService typeOrderService;
+
+    @Mock
+    private ObjectMapper objectMapper;
     
     @InjectMocks
     private DeliveryOrderService deliveryOrderService;
@@ -55,9 +78,18 @@ class DeliveryOrderServiceTests
         order.setName(testName);
     }
 
+    private List<DeliveryOrder> createDeliveryOrders()
+    {
+        return List.of(
+            new DeliveryOrder(1L, testName + "1", null, null, null, null, null, null, null, null, null),
+            new DeliveryOrder(2L, testName + "2", null, null, null, null, null, null, null, null, null)
+        );
+    }
+
     @Test
     void createOrder_ReturnsDeliveryOrder()
     {
+        doNothing().when(dispatcherManager).tell(any(), any());
         when(typeOrderService.safetySaveType(any())).thenReturn(order.getTypeOrder());
         when(deliveryOrderRepository.save(order)).thenReturn(order);
 
@@ -65,6 +97,7 @@ class DeliveryOrderServiceTests
 
         assertNotNull(result);
         assertEquals(order.getName(), result.getName());
+        verify(dispatcherManager).tell(new DispatcherMessage.CreateOrder(result), ActorRef.noSender());
         verify(typeOrderService).safetySaveType(any());
     }
 
@@ -100,7 +133,7 @@ class DeliveryOrderServiceTests
         OrderFilter orderFilter = OrderFilter.builder().name(testName).build();
 
         Pageable pageable = PageRequest.of(0, 10, Sort.by("redactedAt").descending());
-        List<DeliveryOrder> list = List.of(new DeliveryOrder(), new DeliveryOrder());
+        List<DeliveryOrder> list = createDeliveryOrders();
         Page<DeliveryOrder> page = new PageImpl<>(list, pageable, list.size());
 
         when(deliveryOrderRepository.findAll(ArgumentMatchers.<Specification<DeliveryOrder>>any(), eq(pageable))).thenReturn(page);
@@ -140,6 +173,7 @@ class DeliveryOrderServiceTests
         DeliveryOrder formOrder = order;
         formOrder.setName(testName + "test");
 
+        doNothing().when(dispatcherManager).tell(any(), any());
         when(deliveryOrderRepository.findById(testId)).thenReturn(Optional.of(order));
         when(typeOrderService.safetySaveType(any())).thenReturn(order.getTypeOrder());
         when(deliveryOrderRepository.save(any(DeliveryOrder.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -149,6 +183,7 @@ class DeliveryOrderServiceTests
         assertNotNull(result);
         assertEquals(formOrder.getId(), result.getId());
         assertEquals(formOrder.getName(), result.getName());
+        verify(dispatcherManager).tell(new DispatcherMessage.UpdateOrder(result), ActorRef.noSender());
         verify(deliveryOrderRepository).save(order);
     }
 
@@ -162,7 +197,71 @@ class DeliveryOrderServiceTests
 
     @Test
     void deleteOrder_Success() {
+        doNothing().when(dispatcherManager).tell(any(), any());
+
         deliveryOrderService.deleteOrder(testId);
-        verify(deliveryOrderRepository).deleteById(testId);
+        verify(dispatcherManager).tell(new DispatcherMessage.DeleteOrder(testId), ActorRef.noSender());
+    }
+
+    @Test
+    void exportJSON_ReturnsByteArray() throws Exception
+    {
+        List<DeliveryOrder> orders = createDeliveryOrders();
+        when(deliveryOrderRepository.findAll()).thenReturn(orders);
+
+        doAnswer(invocation -> {
+            ByteArrayOutputStream os = invocation.getArgument(0);
+            new ObjectMapper().writeValue(os, new OrdersJsonResponse(orders));
+            return null;
+        }).when(objectMapper).writeValue(any(ByteArrayOutputStream.class), any(OrdersJsonResponse.class));
+
+        byte[] result = deliveryOrderService.exportAllOrders();
+
+        assertNotNull(result);
+        String json = new String(result);
+        assertTrue(json.contains(testName + "1"));
+        assertTrue(json.contains(testName + "2"));
+    }
+
+    @Test
+    void exportJSON_ThrowsExportException() throws Exception
+    {
+        List<DeliveryOrder> orders = createDeliveryOrders();
+        when(deliveryOrderRepository.findAll()).thenReturn(orders);
+        doThrow(new IOException("testException"))
+                .when(objectMapper).writeValue(any(ByteArrayOutputStream.class), any(OrdersJsonResponse.class));
+
+        assertThrows(ExportException.class, () -> deliveryOrderService.exportAllOrders());
+    }
+
+    @Test
+    void importJSON_Success() throws Exception
+    {
+        List<DeliveryOrder> orders = createDeliveryOrders();
+        OrdersJsonResponse response = new OrdersJsonResponse(orders);
+        byte[] jsonData = new ObjectMapper().writeValueAsBytes(response);
+        MultipartFile file = new MockMultipartFile("file", "orders.json", "application/json", jsonData);
+
+        doNothing().when(dispatcherManager).tell(any(), any());
+        when(typeOrderService.safetySaveType(any())).thenReturn(null);
+        when(deliveryOrderRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        when(objectMapper.readValue(any(InputStream.class), eq(OrdersJsonResponse.class))).thenReturn(response);
+
+        deliveryOrderService.importOrders(file);
+
+        verify(dispatcherManager, times(orders.size())).tell(any(DispatcherMessage.CreateOrder.class), eq(ActorRef.noSender()));
+        verify(deliveryOrderRepository, times(orders.size())).save(any(DeliveryOrder.class));
+    }
+
+    @Test
+    void importJSON_ThrowsImportException() throws Exception
+    {
+        MultipartFile file = new MockMultipartFile("file", "orders.json", "application/json", new byte[]{});
+
+        doThrow(new IOException("testException"))
+            .when(objectMapper).readValue(any(InputStream.class), eq(OrdersJsonResponse.class));
+
+        assertThrows(ImportException.class, () -> deliveryOrderService.importOrders(file));
     }
 }

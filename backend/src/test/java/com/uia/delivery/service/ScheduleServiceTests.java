@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -23,18 +24,27 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import com.uia.delivery.controller.filter.ScheduleFilter;
 import com.uia.delivery.controller.filter.SortParams;
+import com.uia.delivery.dto.ScheduleResponse;
 import com.uia.delivery.entity.Schedule;
 import com.uia.delivery.exception.NotFoundException;
 import com.uia.delivery.repository.ScheduleRepository;
+import com.uia.delivery.service.algorithm.SchedulingAlgorithm;
 
 @ExtendWith(MockitoExtension.class)
 class ScheduleServiceTests 
 {
     @Mock
     private ScheduleRepository scheduleRepository;
+
+    @Mock
+    private SchedulingAlgorithm schedulingAlgorithm;
+
+    @Mock
+    private SimpMessagingTemplate messagingTemplate;
 
     @InjectMocks
     private ScheduleService scheduleService;
@@ -46,6 +56,14 @@ class ScheduleServiceTests
     void setUp()
     {
         schedule = Schedule.builder().id(testId).build();
+    }
+
+    private List<Schedule> createSchedules()
+    {
+        return List.of(
+            new Schedule(1L, null, null, null, null, null, null, null, null, null),
+            new Schedule(2L, null, null, null, null, null, null, null, null, null)
+        );
     }
 
     @Test
@@ -65,6 +83,32 @@ class ScheduleServiceTests
         when(scheduleRepository.findById(testId)).thenReturn(Optional.empty());
         
         assertThrows(NotFoundException.class, () -> scheduleService.getScheduleById(testId));
+    }
+
+    @Test
+    void getSchedulesByCourierId_ReturnsSchedules()
+    {
+        List<Schedule> schedules = createSchedules();
+        when(scheduleRepository.findByCourierId(testId)).thenReturn(schedules);
+
+        List<Schedule> result = scheduleService.getSchedulesByCourierId(testId);
+
+        assertNotNull(result);
+        assertEquals(schedules.size(), result.size());
+    }
+
+    @Test
+    void saveShedules_ReturnsSchedules()
+    {
+        List<Schedule> schedules = createSchedules();
+        when(scheduleRepository.saveAll(schedules)).thenAnswer(invocation -> invocation.getArgument(0));
+
+        List<Schedule> result = scheduleService.saveShedules(schedules);
+
+        assertNotNull(result);
+        assertEquals(schedules.size(), result.size());
+        assertEquals(0, result.get(0).getIndex());
+        assertEquals(1, result.get(1).getIndex());
     }
 
     @Test
@@ -111,5 +155,18 @@ class ScheduleServiceTests
 
         assertEquals(0, result.getTotalElements());
         verify(scheduleRepository).findAll(ArgumentMatchers.<Specification<Schedule>>any(), eq(pageable));
+    }
+
+    @Test
+    void receiveUpdatedSchedule_Success()
+    {
+        List<Schedule> schedules = createSchedules();
+        when(scheduleRepository.findByCourierId(testId)).thenReturn(schedules);
+
+        
+        scheduleService.receiveUpdatedSchedule(testId);
+
+        verify(messagingTemplate, times(1))
+            .convertAndSend(eq("/topic/schedules"), eq(new ScheduleResponse(testId, schedules)));
     }
 }
