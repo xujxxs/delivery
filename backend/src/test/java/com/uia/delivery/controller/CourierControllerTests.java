@@ -2,6 +2,7 @@ package com.uia.delivery.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -18,12 +19,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uia.delivery.entity.Courier;
+import com.uia.delivery.exception.ExportException;
+import com.uia.delivery.exception.ImportException;
 import com.uia.delivery.exception.NotFoundException;
 import com.uia.delivery.exception.NullFieldException;
 import com.uia.delivery.service.CourierService;
@@ -190,5 +195,49 @@ class CourierControllerTests
 
         mockMvc.perform(delete("/api/courier/3"))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void exportJSON_Success() throws Exception
+    {
+        byte[] testData = "testData".getBytes();
+        when(courierService.exportAllCouriers()).thenReturn(testData);
+
+        mockMvc.perform(get("/api/courier/export"))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=couriers.json"))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, "application/json"))
+                .andExpect(content().bytes(testData));
+
+    }
+
+    @Test
+    void exportJSON_ThrowsExportException() throws Exception
+    {
+        when(courierService.exportAllCouriers()).thenThrow(new ExportException("Couriers"));
+
+        mockMvc.perform(get("/api/courier/export"))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void importJSON_Success() throws Exception
+    {
+        MockMultipartFile file = new MockMultipartFile("file", "couriers.json", MediaType.APPLICATION_JSON_VALUE, "testData".getBytes());
+        doNothing().when(courierService).importCouriers(any());
+
+        mockMvc.perform(multipart("/api/courier/import").file(file))
+                .andExpect(status().isOk())
+                .andExpect(content().string("File successfully imported."));
+    }
+
+    @Test
+    void importJSON_ThrowsImportException() throws Exception
+    {
+        MockMultipartFile file = new MockMultipartFile("file", "couriers.json", MediaType.APPLICATION_JSON_VALUE, "testData".getBytes());
+        doThrow(new ImportException("Couriers")).when(courierService).importCouriers(any());
+
+        mockMvc.perform(multipart("/api/courier/import").file(file))
+                .andExpect(status().isInternalServerError());
     }
 }

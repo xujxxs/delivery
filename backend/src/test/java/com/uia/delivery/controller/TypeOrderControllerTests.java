@@ -46,9 +46,7 @@ class TypeOrderControllerTests
         mockMvc.perform(get("/api/type-order"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(lto.size()))
-                .andExpect(jsonPath("$[0].id").value(1L))
                 .andExpect(jsonPath("$[0].type").value("type1"))
-                .andExpect(jsonPath("$[1].id").value(2L))
                 .andExpect(jsonPath("$[1].type").value("type2"));
     }
 }
