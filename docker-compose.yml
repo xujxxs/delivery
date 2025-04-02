@@ -1,0 +1,42 @@
+services:
+  backend:
+    build: 
+      context: ./backend
+    environment:
+      DB_HOST: delivery-db
+      DB_PORT: 5432
+      DB_NAME: delivery
+      DB_USERNAME: deliveryapp
+      DB_PASSWORD: deliverypassword
+    depends_on:
+      - delivery-db
+    networks:
+      - uia_delivery
+  
+  delivery-db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: delivery
+      POSTGRES_USERNAME: deliveryapp
+      POSTGRES_PASSWORD: deliverypassword
+    volumes:
+      - ./init-scripts/delivery-db-init.sql:/docker-entrypoint-initdb.d/delivery-db-init.sql
+      - delivery-db-data:/var/lib/postgresql/data
+    networks:
+      - uia_delivery
+  nginx:
+    image: nginx:1.26.3
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - uia_delivery
+  
+networks:
+  uia_delivery:
+
+volumes:
+  delivery-db-data:
