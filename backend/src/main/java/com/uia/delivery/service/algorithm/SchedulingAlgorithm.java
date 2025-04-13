@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class SchedulingAlgorithm
 {
-    public List<Schedule> buildSchedule(
+    public List<Schedule> buildSchedule(  // TODO: add unit test
             Courier courier,
             DeliveryOrder order, 
             List<Schedule> schedule, 
@@ -66,11 +66,11 @@ public class SchedulingAlgorithm
             newSchedule.add(deliveryOrder);
         }
 
-        log.trace("Schedule built successfully. New schedule size: {}", newSchedule.size());
+        log.trace("Schedule build successfully. New schedule size: {}", newSchedule.size());
         return newSchedule;
     }
 
-    public ResultRebuildSchedule rebuildSchedule(
+    public ResultRebuildSchedule rebuildSchedule(  // TODO: add unit test
             Courier courier, 
             List<Schedule> courierSchedule)
     {
@@ -108,7 +108,7 @@ public class SchedulingAlgorithm
         return new ResultRebuildSchedule(newCourierSchedule, refusedOrders);
     }
 
-    public ResultFindMaxProfit findMaxProfit(Courier courier, List<Schedule> courierSchedule, DeliveryOrder addedOrder)
+    public ResultFindMaxProfit findMaxProfit(Courier courier, List<Schedule> courierSchedule, DeliveryOrder addedOrder)  // TODO: add unit test
     {
         log.debug("Calculate max profit courier: {}, with order: {}",
             courier.getId(), addedOrder.getId());

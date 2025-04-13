@@ -37,7 +37,7 @@
         <appender-ref ref="Archived" />
     </root>
 
-    <logger name="com.uia" level="debug" additivity="false">
+    <logger name="com.uia" level="info" additivity="false">
         <appender-ref ref="Console" />
         <appender-ref ref="Latest" />
         <appender-ref ref="Archived" />
