@@ -1,6 +1,7 @@
 package com.uia.delivery.controller;
 
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -84,4 +85,17 @@ public class ScheduleController
                 .status(HttpStatus.OK)
                 .body(pageSchedule);
     }
+
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> exportJSON() 
+    {
+        log.info("GET '/api/schedule/export'");
+        byte[] exportFile = scheduleService.exportAllSchedules();
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=schedules.json")
+                .header(HttpHeaders.CONTENT_TYPE, "application/json")
+                .body(exportFile);
+    }
+    
 }

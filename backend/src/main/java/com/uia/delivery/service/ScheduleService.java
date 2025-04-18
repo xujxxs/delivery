@@ -1,5 +1,7 @@
 package com.uia.delivery.service;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -11,12 +13,16 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uia.delivery.controller.filter.ScheduleFilter;
 import com.uia.delivery.controller.filter.SortParams;
+import com.uia.delivery.dto.OrdersJsonResponse;
 import com.uia.delivery.dto.ScheduleResponse;
+import com.uia.delivery.dto.SchedulesJsonResponse;
 import com.uia.delivery.entity.Courier;
 import com.uia.delivery.entity.DeliveryOrder;
 import com.uia.delivery.entity.Schedule;
+import com.uia.delivery.exception.ExportException;
 import com.uia.delivery.exception.NotFoundException;
 import com.uia.delivery.repository.ScheduleRepository;
 import com.uia.delivery.repository.specification.ScheduleSpecification;
@@ -31,15 +37,18 @@ public class ScheduleService
     private final ScheduleRepository scheduleRepository;
     private final SchedulingAlgorithm schedulingAlgorithm;
     private final SimpMessagingTemplate messagingTemplate;
+    private final ObjectMapper objectMapper;
 
     public ScheduleService(
             ScheduleRepository scheduleRepository,
             SchedulingAlgorithm schedulingAlgorithm,
-            SimpMessagingTemplate messagingTemplate
+            SimpMessagingTemplate messagingTemplate,
+            ObjectMapper objectMapper
     ) {
         this.scheduleRepository = scheduleRepository;
         this.schedulingAlgorithm = schedulingAlgorithm;
         this.messagingTemplate = messagingTemplate;
+        this.objectMapper = objectMapper;
     }
 
     public Schedule getScheduleById(Long id)
@@ -81,6 +90,21 @@ public class ScheduleService
 
         log.info("Fetched {} schedules by params", ans.getTotalElements());
         return ans;
+    }
+
+    public byte[] exportAllSchedules()
+    {
+        log.debug("Exporting all schedules");
+        List<Schedule> allSchedules = scheduleRepository.findAll();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        try {
+            objectMapper.writeValue(outputStream, new SchedulesJsonResponse(allSchedules));
+        } catch (IOException e) {
+            log.error("Error export file. By: {}", e.getMessage());
+            throw new ExportException("Schedules");
+        }
+        log.info("Exported {} schedules", allSchedules.size());
+        return outputStream.toByteArray();
     }
 
     public void receiveUpdatedSchedule(Long courierId)
