@@ -5,6 +5,7 @@ import java.util.stream.Stream;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.uia.delivery.controller.filter.OrderFilter;
+import com.uia.delivery.controller.filter.RectandlePosFilter;
 import com.uia.delivery.entity.DeliveryOrder;
 
 public class DeliveryOrderSpecification
@@ -13,6 +14,12 @@ public class DeliveryOrderSpecification
     {
         throw new IllegalStateException("Utility class");
     }
+
+    public static Specification<DeliveryOrder> getInRectPos(RectandlePosFilter filter)
+    {
+        return Specification.where(BaseSpecification.<DeliveryOrder>getInRectPos(filter, "positionPickUp"))
+                .or(BaseSpecification.<DeliveryOrder>getInRectPos(filter, "positionDelivery"));
+    } 
 
     public static Specification<DeliveryOrder> dynamicFilter(OrderFilter filter)
     {

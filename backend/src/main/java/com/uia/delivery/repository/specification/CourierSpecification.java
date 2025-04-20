@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.uia.delivery.controller.filter.CourierFilter;
+import com.uia.delivery.controller.filter.RectandlePosFilter;
 import com.uia.delivery.entity.Courier;
 
 import jakarta.persistence.criteria.Predicate;
@@ -17,6 +18,11 @@ public class CourierSpecification
     {
         throw new IllegalStateException("Utility class");
     }
+
+    public static Specification<Courier> getInRectPos(RectandlePosFilter filter)
+    {
+        return Specification.where(BaseSpecification.<Courier>getInRectPos(filter, "position"));
+    } 
 
     public static Specification<Courier> dynamicFilter(CourierFilter filter) 
     {

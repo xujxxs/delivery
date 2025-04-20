@@ -2,6 +2,9 @@ package com.uia.delivery.repository.specification;
 
 import org.springframework.data.jpa.domain.Specification;
 
+import com.uia.delivery.controller.filter.RectandlePosFilter;
+
+import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 
 public abstract class BaseSpecification 
@@ -31,6 +34,16 @@ public abstract class BaseSpecification
                 predicate = builder.and(predicate, builder.lessThanOrEqualTo(root.get(attributeName), maxAttr));
             }
             return predicate;
+        };
+    }
+
+    public static <T> Specification<T> getInRectPos(RectandlePosFilter filter, String attributeName) {
+        return (root, query, cb) -> {
+            Path<Double> xPath = root.get(attributeName).get("x");
+            Path<Double> yPath = root.get(attributeName).get("y");
+            Predicate px = cb.between(xPath, filter.getLeftUp().getX(), filter.getRightBottom().getX());
+            Predicate py = cb.between(yPath, filter.getRightBottom().getY(), filter.getLeftUp().getY());
+            return cb.and(px, py);
         };
     }
 

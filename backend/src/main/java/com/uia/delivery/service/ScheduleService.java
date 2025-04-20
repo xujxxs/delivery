@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uia.delivery.controller.filter.ScheduleFilter;
 import com.uia.delivery.controller.filter.SortParams;
-import com.uia.delivery.dto.OrdersJsonResponse;
 import com.uia.delivery.dto.ScheduleResponse;
 import com.uia.delivery.dto.SchedulesJsonResponse;
 import com.uia.delivery.entity.Courier;
