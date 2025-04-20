@@ -63,7 +63,7 @@ public class DeliveryOrderController
     @GetMapping
     public ResponseEntity<Page<DeliveryOrder>> getOrdersByParams(
             @RequestParam(defaultValue = "1") int pageNumber,
-            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "20") int pageSize,
             @RequestParam(defaultValue = "redactedAt") String sortBy,
             @RequestParam(defaultValue = "desc") String sortOrder,
             @RequestParam(required = false) String name,

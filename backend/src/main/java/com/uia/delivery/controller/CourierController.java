@@ -65,7 +65,7 @@ public class CourierController
     @GetMapping
     public ResponseEntity<Page<Courier>> getCouriersByParams(
             @RequestParam(defaultValue = "1") int pageNumber,
-            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "20") int pageSize,
             @RequestParam(defaultValue = "redactedAt") String sortBy,
             @RequestParam(defaultValue = "desc") String sortOrder,
             @RequestParam(required = false) String firstname,
