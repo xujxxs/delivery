@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DispatcherManager extends AbstractActor
 {
     private final Map<Long, ActorRef> couriersRef = new HashMap<>();
+    private final CourierRepository courierRepository;
     private final DeliveryOrderRepository deliveryOrderRepository;
     private final ScheduleService scheduleService;
 
@@ -34,6 +35,7 @@ public class DispatcherManager extends AbstractActor
     ) {
         this.deliveryOrderRepository = deliveryOrderRepository;
         this.scheduleService = scheduleService;
+        this.courierRepository = courierRepository;
 
         courierRepository.findAll().forEach(courier -> {
             log.info("Init aktor courier: {}", courier.getId());
@@ -117,6 +119,9 @@ public class DispatcherManager extends AbstractActor
                 .filter(Optional::isPresent)
                 .map(Optional::get)
             .toList();
+
+        courierRepository.deleteById(courierId);
+        log.info("Courier {} deleted from database", courierId);
         
         if(assignedOrders.isEmpty())
             log.debug("Courier: {} has no assigned orders", courierId);

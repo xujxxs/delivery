@@ -107,9 +107,8 @@ public class CourierService
     public void deleteCourier(Long id)
     {
         log.debug("Deleting courier with id: {}", id);
-        courierRepository.deleteById(id);
-        log.info("Courier {} deleted from database", id);
         dispatcherManager.tell(new DispatcherMessage.DeleteCourier(id), ActorRef.noSender());
+        log.info("Request was sent to DispatcherManager to delete courier: {}", id);
     }
 
     public byte[] exportAllCouriers()
@@ -140,7 +139,7 @@ public class CourierService
             });
             log.info("Successfully imported {} couriers", couriers.size());
         } catch (IOException e) {
-            log.warn("Error import file. By: ", e.getMessage());
+            log.warn("Error import file. By: ", e.getCause());
             throw new ImportException("Couriers");
         }
     }
