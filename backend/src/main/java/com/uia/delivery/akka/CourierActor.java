@@ -92,12 +92,12 @@ public class CourierActor extends AbstractActor
         }
         
         courierSchedule = scheduleService.buildSchedule(courier, order, courierSchedule, result.getPickupIndex(), result.getDeliveryIndex());
-        scheduleService.saveShedules(courierSchedule);
-        log.info("Order: {}, added to schedule courier: {}",
-            order.getId(), courier.getId());
+        List<Schedule> savedSchedule = scheduleService.saveShedules(courierSchedule);
+        log.info("Order: {}, added to schedule courier: {} on (pickupIndex: {}, deliveryIndex: {})",
+            order.getId(), courier.getId(), result.getPickupIndex(), result.getDeliveryIndex());
         
         log.debug("New schedule courier: {}, List<Schedule>: {}", 
-            courier.getId(), courierSchedule);
+            courier.getId(), savedSchedule);
         scheduleService.receiveUpdatedSchedule(courier.getId());
         return true;
     }

@@ -5,13 +5,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
 import com.uia.delivery.entity.Courier;
 import com.uia.delivery.entity.DeliveryOrder;
 import com.uia.delivery.entity.Schedule;
-import com.uia.delivery.entity.subsidiary.Coordinates;
 import com.uia.delivery.entity.subsidiary.TypeOperation;
 
 import lombok.AllArgsConstructor;
@@ -22,6 +22,22 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class SchedulingAlgorithm
 {
+    private List<Schedule> deepCopy(List<Schedule> schedule) { // TODO: add unit test
+        return schedule.stream()
+            .map(s -> Schedule.builder()
+                .id(s.getId())
+                .index(s.getIndex())
+                .courier(s.getCourier())
+                .deliveryOrder(s.getDeliveryOrder())
+                .typeOperation(s.getTypeOperation())
+                .periodOperation(s.getPeriodOperation())
+                .positionStart(s.getPositionStart())
+                .positionEnd(s.getPositionEnd())
+                .createdAt(s.getCreatedAt())
+                .redactedAt(s.getRedactedAt())
+                .build())
+            .collect(Collectors.toList());
+    }
     public List<Schedule> buildSchedule(  // TODO: add unit test
             Courier courier,
             DeliveryOrder order, 
@@ -29,27 +45,36 @@ public class SchedulingAlgorithm
             int pickupIndex, 
             int deliveryIndex
     ) {
-        log.trace("Adding order: {} to courier: {} schedule (pickupIndex: {}, deliveryIndex: {})",
+        log.debug("Adding order: {} to courier: {} schedule (pickupIndex: {}, deliveryIndex: {})",
                 order.getId(), courier.getId(), pickupIndex, deliveryIndex);
 
-        Coordinates receiveOrderPos;
-        if(pickupIndex == 0) {
-            receiveOrderPos = courier.getPosition();
-        } else {
-            receiveOrderPos = schedule.get(pickupIndex - 1).getPositionEnd();
+        List<Schedule> newSchedule = deepCopy(schedule);
+        log.debug("Before add schedule courier: {}, size: {}, list:", courier.getId(), newSchedule.size());
+        for (int i = 0; i < newSchedule.size(); i++) {
+            log.debug("Co: {}, Or: {}, i: {}. [{}; {}], [{}; {}]", 
+                courier.getId(), newSchedule.get(i).getDeliveryOrder().getId(), i, 
+                newSchedule.get(i).getPositionStart().getX(), newSchedule.get(i).getPositionStart().getY(), 
+                newSchedule.get(i).getPositionEnd().getX(), newSchedule.get(i).getPositionEnd().getY());
         }
 
         Schedule pickupOrder = Schedule.builder()
                 .courier(courier)
                 .deliveryOrder(order)
-                .positionStart(receiveOrderPos)
+                .positionStart(pickupIndex == 0 || newSchedule.isEmpty()
+                    ? courier.getPosition()
+                    : newSchedule.get(pickupIndex - 1).getPositionEnd())
                 .positionEnd(order.getPositionPickUp())
                 .typeOperation(TypeOperation.PICKUP)
             .build();
         pickupOrder.calculateOperationTime();
 
-        List<Schedule> newSchedule = new ArrayList<>(schedule);
         newSchedule.add(pickupIndex, pickupOrder);
+        if (pickupIndex + 1 < newSchedule.size()) 
+        {
+            Schedule next = newSchedule.get(pickupIndex + 1);
+            next.setPositionStart(pickupOrder.getPositionEnd());
+            next.calculateOperationTime();
+        }
 
         Schedule deliveryOrder = Schedule.builder()
                 .courier(courier)
@@ -60,13 +85,20 @@ public class SchedulingAlgorithm
             .build();
         deliveryOrder.calculateOperationTime();
 
-        if (deliveryIndex <= newSchedule.size()) {
-            newSchedule.add(deliveryIndex, deliveryOrder);
-        } else {
-            newSchedule.add(deliveryOrder);
+        newSchedule.add(deliveryIndex, deliveryOrder);
+        if (deliveryIndex + 1 < newSchedule.size()) {
+            Schedule next = newSchedule.get(deliveryIndex + 1);
+            next.setPositionStart(deliveryOrder.getPositionEnd());
+            next.calculateOperationTime();
+        }
+        
+        log.debug("After add schedule courier: {}, size: {}, list:", courier.getId(), newSchedule.size());
+        for (int i = 0; i < newSchedule.size(); i++) {
+            newSchedule.get(i).setIndex((long) i);
+            log.debug("Co: {}, Or: {}, i: {}. [{}; {}], [{}; {}]", courier.getId(), newSchedule.get(i).getDeliveryOrder().getId(), i, newSchedule.get(i).getPositionStart().getX(), newSchedule.get(i).getPositionStart().getY(), newSchedule.get(i).getPositionEnd().getX(), newSchedule.get(i).getPositionEnd().getY());
         }
 
-        log.trace("Schedule build successfully. New schedule size: {}", newSchedule.size());
+        log.debug("Schedule build successfully. New schedule size: {}", newSchedule.size());
         return newSchedule;
     }
 
@@ -201,7 +233,7 @@ public class SchedulingAlgorithm
             if(write.getTypeOperation().equals(TypeOperation.DELIVERY))
                 totalCost += write.getDeliveryOrder().getCost();
         }
-        log.trace("Total delivery cost computed: {}", totalCost);
+        log.debug("Total delivery's cost computed: {}", totalCost);
         return totalCost;
     }
 

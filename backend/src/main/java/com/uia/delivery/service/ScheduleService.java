@@ -3,7 +3,6 @@ package com.uia.delivery.service;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -68,8 +67,6 @@ public class ScheduleService
     public List<Schedule> saveShedules(List<Schedule> schedules)
     {
         log.debug("Save {} schedules", schedules.size());
-        IntStream.range(0, schedules.size())
-            .forEach(i -> schedules.get(i).setIndex((long) i));
         List<Schedule> savedSchedules = scheduleRepository.saveAll(schedules);
         log.debug("Schedules successfully saved");
         return savedSchedules;
