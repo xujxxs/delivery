@@ -1,5 +1,7 @@
 package com.uia.delivery.entity;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -70,4 +72,14 @@ public class Courier
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime redactedAt;
+
+    public void setCost(Double cost)
+    {
+        this.cost = BigDecimal.valueOf(cost).setScale(2, RoundingMode.HALF_UP).doubleValue();
+    }
+
+    public void setSpeed(Double speed)
+    {
+        this.speed = BigDecimal.valueOf(speed).setScale(2, RoundingMode.HALF_UP).doubleValue();
+    }
 }

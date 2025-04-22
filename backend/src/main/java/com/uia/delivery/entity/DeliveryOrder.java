@@ -1,5 +1,7 @@
 package com.uia.delivery.entity;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -70,4 +72,9 @@ public class DeliveryOrder
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime redactedAt;
+
+    public void setCost(Double cost)
+    {
+        this.cost = BigDecimal.valueOf(cost).setScale(2, RoundingMode.HALF_UP).doubleValue();
+    }
 }
