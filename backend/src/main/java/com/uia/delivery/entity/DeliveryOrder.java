@@ -3,6 +3,7 @@ package com.uia.delivery.entity;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -42,9 +43,6 @@ public class DeliveryOrder
     @Column(nullable = false)
     private Double cost; // Measured in currency
 
-    @Column(nullable = false)
-    private Long deliveryPeriod; // Measured in seconds
-
     @ManyToOne
     @JoinColumn(name = "type_order_id", nullable = false)
     private TypeOrder typeOrder;
@@ -60,6 +58,12 @@ public class DeliveryOrder
     @AttributeOverride(name = "x", column = @Column(name = "delivery_x"))
     @AttributeOverride(name = "y", column = @Column(name = "delivery_y"))
     private Coordinates positionDelivery;
+
+    @Column(nullable = false)
+    private LocalTime openPeriod;
+
+    @Column(nullable = false)
+    private LocalTime closePeriod;
 
     @ManyToOne
     @JoinColumn(name = "courier_id", nullable = true)

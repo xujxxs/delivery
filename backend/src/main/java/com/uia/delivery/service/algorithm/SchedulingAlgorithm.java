@@ -1,5 +1,6 @@
 package com.uia.delivery.service.algorithm;
 
+import java.time.LocalTime;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -30,7 +31,8 @@ public class SchedulingAlgorithm
                 .courier(s.getCourier())
                 .deliveryOrder(s.getDeliveryOrder())
                 .typeOperation(s.getTypeOperation())
-                .periodOperation(s.getPeriodOperation())
+                .arrivalTime(s.getArrivalTime())
+                .amountTimeSpent(s.getAmountTimeSpent())
                 .positionStart(s.getPositionStart())
                 .positionEnd(s.getPositionEnd())
                 .createdAt(s.getCreatedAt())
@@ -66,14 +68,11 @@ public class SchedulingAlgorithm
                 .positionEnd(order.getPositionPickUp())
                 .typeOperation(TypeOperation.PICKUP)
             .build();
-        pickupOrder.calculateOperationTime();
 
         newSchedule.add(pickupIndex, pickupOrder);
-        if (pickupIndex + 1 < newSchedule.size()) 
-        {
+        if (pickupIndex + 1 < newSchedule.size()) {
             Schedule next = newSchedule.get(pickupIndex + 1);
             next.setPositionStart(pickupOrder.getPositionEnd());
-            next.calculateOperationTime();
         }
 
         Schedule deliveryOrder = Schedule.builder()
@@ -83,18 +82,22 @@ public class SchedulingAlgorithm
                 .positionEnd(order.getPositionDelivery())
                 .typeOperation(TypeOperation.DELIVERY)
             .build();
-        deliveryOrder.calculateOperationTime();
 
         newSchedule.add(deliveryIndex, deliveryOrder);
         if (deliveryIndex + 1 < newSchedule.size()) {
             Schedule next = newSchedule.get(deliveryIndex + 1);
             next.setPositionStart(deliveryOrder.getPositionEnd());
-            next.calculateOperationTime();
         }
         
         log.debug("After add schedule courier: {}, size: {}, list:", courier.getId(), newSchedule.size());
         for (int i = 0; i < newSchedule.size(); i++) {
-            newSchedule.get(i).setIndex((long) i);
+            Schedule obj = newSchedule.get(i);
+            obj.setIndex((long) i);
+            if(i == 0) {
+                obj.calculateOperationTime(LocalTime.of(0, 0));
+            } else {
+                obj.calculateOperationTime(newSchedule.get(i - 1).getArrivalTime());
+            }
             log.debug("Co: {}, Or: {}, i: {}. [{}; {}], [{}; {}]", courier.getId(), newSchedule.get(i).getDeliveryOrder().getId(), i, newSchedule.get(i).getPositionStart().getX(), newSchedule.get(i).getPositionStart().getY(), newSchedule.get(i).getPositionEnd().getX(), newSchedule.get(i).getPositionEnd().getY());
         }
 
@@ -178,14 +181,14 @@ public class SchedulingAlgorithm
         return ans;
     }
 
-    public long computeTotalOperationTime(Courier courier, List<Schedule> schedule)
+    public long computeTotalOperationTime(Courier courier, List<Schedule> schedule) // TODO: Redact unit test
     {
         long ans = 0;
         for(Schedule write : schedule)
         {
-            ans += write.getPeriodOperation();
+            ans += write.getAmountTimeSpent();
             if(write.getTypeOperation().equals(TypeOperation.DELIVERY)
-                    && write.getDeliveryOrder().getDeliveryPeriod() < ans) 
+                    && write.getArrivalTime().isAfter(write.getDeliveryOrder().getClosePeriod()))
             {
                 log.debug("Courier: {} doesn't have time with schedule", courier.getId());
                 return -1;

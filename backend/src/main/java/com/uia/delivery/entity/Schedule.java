@@ -1,6 +1,7 @@
 package com.uia.delivery.entity;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OnDelete;
@@ -55,8 +56,10 @@ public class Schedule
     private TypeOperation typeOperation;
 
     @Column(nullable = false)
-    private Long periodOperation; // Measured in seconds
-    
+    private LocalTime arrivalTime;
+
+    @Column(nullable = false)
+    private Long amountTimeSpent;
     
     @Column(nullable = false)
     @Embedded
@@ -79,9 +82,19 @@ public class Schedule
     @Column(nullable = false)
     private LocalDateTime redactedAt;
 
-    public void calculateOperationTime()
+    public void calculateOperationTime(LocalTime prevTime)
     {
         double distanceDelivery = positionEnd.distanceTo(positionStart);
-        this.periodOperation = (long)(distanceDelivery / (courier.getSpeed() / 3600));
+        long secondsToArrive = (long) (distanceDelivery / (courier.getSpeed() / 3600));
+        this.amountTimeSpent = secondsToArrive;
+        
+        LocalTime minTimeEndOperation = prevTime.plusSeconds(secondsToArrive);
+        if(typeOperation.equals(TypeOperation.PICKUP) 
+                && !minTimeEndOperation.isAfter(deliveryOrder.getOpenPeriod())
+        ) {
+            this.arrivalTime = deliveryOrder.getOpenPeriod();
+            return;
+        }
+        this.arrivalTime = minTimeEndOperation;
     }
 }

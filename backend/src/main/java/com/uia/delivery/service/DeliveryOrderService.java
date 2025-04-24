@@ -92,7 +92,8 @@ public class DeliveryOrderService
         updateOrder.setName(updateForm.getName());
         updateOrder.setWeight(updateForm.getWeight());
         updateOrder.setCost(updateForm.getCost());
-        updateOrder.setDeliveryPeriod(updateForm.getDeliveryPeriod());
+        updateOrder.setOpenPeriod(updateForm.getOpenPeriod());
+        updateOrder.setClosePeriod(updateForm.getClosePeriod());
         updateOrder.setPositionPickUp(updateForm.getPositionPickUp());
         updateOrder.setPositionDelivery(updateForm.getPositionDelivery());
 
