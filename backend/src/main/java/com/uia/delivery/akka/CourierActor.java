@@ -98,7 +98,7 @@ public class CourierActor extends AbstractActor
         
         log.debug("New schedule courier: {}, List<Schedule>: {}", 
             courier.getId(), savedSchedule);
-        scheduleService.receiveUpdatedSchedule(courier.getId());
+        scheduleService.receiveUpdateScheduleMsg(courier.getId());
         return true;
     }
 
@@ -126,7 +126,7 @@ public class CourierActor extends AbstractActor
         {
             log.info("Schedule courier: {}, is valid after {}", 
                 courier.getId(), processDescription);
-            scheduleService.receiveUpdatedSchedule(courier.getId());
+            scheduleService.receiveUpdateScheduleMsg(courier.getId());
             return;
         }
         log.debug("Schedule courier: {}, is not valid after {}", 
@@ -141,6 +141,6 @@ public class CourierActor extends AbstractActor
             log.debug("All orders were saved from the old schedule");
         }
         scheduleService.saveShedules(resultRebuild.getNewSchedule());
-        scheduleService.receiveUpdatedSchedule(courier.getId());
+        scheduleService.receiveUpdateScheduleMsg(courier.getId());
     }
 }

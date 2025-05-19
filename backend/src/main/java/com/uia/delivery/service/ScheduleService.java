@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uia.delivery.controller.filter.ScheduleFilter;
 import com.uia.delivery.controller.filter.SortParams;
-import com.uia.delivery.dto.ScheduleResponse;
 import com.uia.delivery.dto.SchedulesJsonResponse;
 import com.uia.delivery.entity.Courier;
 import com.uia.delivery.entity.DeliveryOrder;
@@ -103,11 +102,10 @@ public class ScheduleService
         return outputStream.toByteArray();
     }
 
-    public void receiveUpdatedSchedule(Long courierId)
+    public void receiveUpdateScheduleMsg(Long courierId)
     {
-        List<Schedule> schedules = getSchedulesByCourierId(courierId);
         log.info("SEND '/topic/schedules' | Update schedule by courierId: {}", courierId);
-        messagingTemplate.convertAndSend("/topic/schedules", new ScheduleResponse(courierId, schedules));
+        messagingTemplate.convertAndSend("/topic/schedules", "SCHEDULE_UPDATED");
     }
 
     public List<Schedule> buildSchedule(Courier courier, DeliveryOrder order, List<Schedule> schedule, int pickupIndex, int deliveryIndex) {

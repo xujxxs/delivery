@@ -2,6 +2,7 @@ package com.uia.delivery.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import com.uia.delivery.akka.DispatcherManager;
 import com.uia.delivery.repository.CourierRepository;
@@ -23,9 +24,17 @@ public class AkkaConfig
     public ActorRef dispatcherManager(
             ActorSystem system,
             CourierRepository courierRepository,
+            SimpMessagingTemplate messagingTemplate,
             DeliveryOrderRepository deliveryOrderRepository,
             ScheduleService scheduleService
     ) {
-        return system.actorOf(DispatcherManager.props(courierRepository, deliveryOrderRepository, scheduleService), "dispatcherManager");
+        return system.actorOf(
+            DispatcherManager.props(
+                courierRepository, 
+                messagingTemplate, 
+                deliveryOrderRepository, 
+                scheduleService
+            ), "dispatcherManager"
+        );
     }
 }

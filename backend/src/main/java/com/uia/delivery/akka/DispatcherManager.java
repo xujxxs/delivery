@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+
 import com.uia.delivery.akka.message.DispatcherMessage;
 import com.uia.delivery.akka.query.CourierQuery;
 import com.uia.delivery.entity.DeliveryOrder;
@@ -25,15 +27,18 @@ public class DispatcherManager extends AbstractActor
 {
     private final Map<Long, ActorRef> couriersRef = new HashMap<>();
     private final CourierRepository courierRepository;
+    private final SimpMessagingTemplate messagingTemplate;
     private final DeliveryOrderRepository deliveryOrderRepository;
     private final ScheduleService scheduleService;
 
     public DispatcherManager(
             CourierRepository courierRepository,
+            SimpMessagingTemplate messagingTemplate,
             DeliveryOrderRepository deliveryOrderRepository,
             ScheduleService scheduleService
     ) {
         this.deliveryOrderRepository = deliveryOrderRepository;
+        this.messagingTemplate = messagingTemplate;
         this.scheduleService = scheduleService;
         this.courierRepository = courierRepository;
 
@@ -50,10 +55,14 @@ public class DispatcherManager extends AbstractActor
 
     public static Props props(
         CourierRepository courierRepository,
+        SimpMessagingTemplate messagingTemplate,
         DeliveryOrderRepository deliveryOrderRepository,
         ScheduleService scheduleService
     ) {
-        return Props.create(DispatcherManager.class, () -> new DispatcherManager(courierRepository, deliveryOrderRepository, scheduleService));
+        return Props.create(
+            DispatcherManager.class, () ->
+                new DispatcherManager(courierRepository, messagingTemplate, deliveryOrderRepository, scheduleService)
+        );
     }
 
     @Override
@@ -86,6 +95,10 @@ public class DispatcherManager extends AbstractActor
         couriersRef.put(courierId, courierRef);
 
         log.info("Aktor courier: {} created.", courierId);
+
+        log.info("SEND '/topic/courier' | Courier created");
+        messagingTemplate.convertAndSend("/topic/courier", "COURIER_CREATE");
+
         searchOrders(courierRef);
     }
 
@@ -99,6 +112,9 @@ public class DispatcherManager extends AbstractActor
             return;
         }
         couriersRef.get(courierId).tell(msg, getSender());
+
+        log.info("SEND '/topic/courier' | Courier updated");
+        messagingTemplate.convertAndSend("/topic/courier", "COURIER_UPDATE");
     }
 
     private void handleDeleteCourier(DispatcherMessage.DeleteCourier msg)
@@ -129,10 +145,17 @@ public class DispatcherManager extends AbstractActor
         getContext().stop(courierRef);
         log.info("Aktor courier: {} deleted", courierId);
 
+        log.info("SEND '/topic/courier' | Courier deleted");
+        messagingTemplate.convertAndSend("/topic/courier", "COURIER_DELETE");
+
         assignedOrders.forEach(this::searchCourier);
     }
 
-    private void handleAddOrder(DispatcherMessage.CreateOrder msg) {
+    private void handleAddOrder(DispatcherMessage.CreateOrder msg) 
+    {
+        log.info("SEND '/topic/order' | Order created");
+        messagingTemplate.convertAndSend("/topic/order", "ORDER_CREATE");
+
         searchCourier(msg.getOrder());
     }
 
@@ -153,6 +176,9 @@ public class DispatcherManager extends AbstractActor
             return;
         }
         couriersRef.get(assignedCourierId).tell(msg, getSelf());
+
+        log.info("SEND '/topic/order' | Order updated");
+        messagingTemplate.convertAndSend("/topic/order", "ORDER_UPDATE");
     }
 
     private void handleRefindOrders(DispatcherMessage.RefindOrder msg)
@@ -191,6 +217,9 @@ public class DispatcherManager extends AbstractActor
             log.debug("Order: {}, not binded with courier", msg.getOrderId());
         }
         log.info("Order: {} deleted", msg.getOrderId());
+
+        log.info("SEND '/topic/order' | Order deleted");
+        messagingTemplate.convertAndSend("/topic/order", "ORDER_DELETE");
     }
 
     private Optional<DeliveryOrder> unbindAndSaveOrderById(Long orderId, Long courierId) {
