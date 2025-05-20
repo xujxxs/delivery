@@ -1,0 +1,58 @@
+.create,
+.update {
+    width: 40%;
+}
+
+.courier-form,
+.order-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-block,
+.input-block {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.input-block {
+    gap: 5px;
+}
+
+.input-block p {
+    font-size: 14px;
+    font-weight: 300;
+}
+
+.input-block input {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.coordinates-form,
+.coordinates-inputs {
+    display: flex;
+    width: 100%;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.coordinates-inputs input {
+    width: 100%;
+}
+
+.select-on-map {
+    width: 34px;
+    border: 1px solid #D9D9D9;  
+    padding: 0;
+    box-sizing: content-box;
+    border-radius: 8px;
+    background-color: white;
+    background-image: url(assets/on-map.png);
+    background-size: 24px 24px;  
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+}

@@ -1,0 +1,33 @@
+.table-row > .name {
+    width: 100%;
+}
+
+.btns-line {
+    margin-top: 5px;
+}
+
+.btns-line button {
+    font-size: 16px;
+    padding: 8px 15px;
+    font-weight: 500;
+}
+
+button.del-btn {
+    background-color: #00000000;
+    border: 1px solid #DB292C;
+    color: #DB292C;
+}
+
+button.del-btn:hover {
+    background-color: #DB292C;
+    color: white;
+}
+
+button.red-btn {
+    background-color: #7F85FF;
+    color: white;
+}
+
+button.red-btn:hover {
+    background-color: #5458b3;
+}

@@ -1,8 +1,21 @@
 services:
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        - REACT_APP_BACKEND_URL=
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - backend
+    networks:
+      - uia_delivery
+
   backend:
     build: 
       context: ./backend
     environment:
+      FRONTEND_URLS: "http://localhost"
       DB_HOST: delivery-db
       DB_PORT: 5432
       DB_NAME: delivery

@@ -1,0 +1,15 @@
+.export-btn {
+    font-size: 16px;
+    gap: 8px;
+    padding: 12px 17px;
+    box-shadow: 0 2px 5px 1px rgba(0, 0, 0, 0.3);
+}
+
+.export-btn img {
+    height: 20px;
+    width: 20px;
+}
+
+.schedule-export {
+    padding: 10px 17px;
+}

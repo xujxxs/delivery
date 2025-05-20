@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Nokora:wght@100;300;400;700;900&display=swap');
+
+button {
+    cursor: pointer;
+}
+
+.slide-panel {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 0;
+    left: -900px;
+    width: 40vw;
+    height: 100vh;
+    min-width: 560px;
+    max-width: 900px;
+    z-index: 1002;
+    background: white;
+    box-shadow: 2px 0 5px 1px rgba(0, 0, 0, 0.3);
+    transition: .5s all;
+}
+
+.slide-panel.open {
+    left: 0;
+}

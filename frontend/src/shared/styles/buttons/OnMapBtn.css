@@ -1,0 +1,14 @@
+.find-on-map {
+    border: 0;
+    padding: 0;
+    border-radius: 5px;
+    height: 18px;
+    width: 18px;
+    box-sizing: content-box;
+    background: white;
+    background-image: url(assets/on-map.png);
+    background-size: 14px 14px;  
+    background-repeat: no-repeat;
+    background-position: center;
+    box-shadow: 0 2px 5px 0px rgba(0, 0, 0, 0.3);
+}

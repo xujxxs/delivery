@@ -1,0 +1,65 @@
+.app-selected {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    flex: 1 1 auto;
+    box-sizing: border-box;
+    padding-bottom: 0;
+    background-color: #F6F6F6;
+    overflow: hidden;
+}
+
+.app-main,
+.app-list-work {  
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.app-list-work {  
+    padding: 15px 20px;
+    transition: all .3s;
+}
+
+.app-filter {
+    margin: 15px 20px;
+}
+
+.filter-active {
+    opacity: 0;
+}
+
+.create-export-import {
+    display: flex;
+    gap: 10px;
+}
+
+.filters-sort {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    padding: 5px 0 10px 0; 
+    align-items: center;
+    border-top: 1px solid #D6D6D6;
+    border-bottom: 1px solid #D6D6D6;
+}
+
+.schedule-filters-sort {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 10px; 
+    align-items: center;
+    border-bottom: 1px solid #D6D6D6;
+}
+
+.filter-and-break {
+    display: flex;
+    gap: 10px;
+}
+
+.sort-and-page {
+    font-size: 14px;
+    display: flex;
+    padding-bottom: 5px;
+    gap: 10px;
+}

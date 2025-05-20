@@ -1,0 +1,127 @@
+.table-container {
+    margin-top: 10px;
+    flex: 1 1 auto;
+    font-size: 19px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.table-title .table-row {
+    border-radius: 5px 5px 0 0;
+    box-shadow: 0 2px 5px 1px rgba(0, 0, 0, 0.3);
+}
+
+.table-body .table-row {
+    border-radius: 5px;
+}
+
+.table-title {
+    padding: 5px;
+}
+
+.table-row .dop {
+    width: 38px;
+}
+
+.table-body {
+    padding: 10px 5px;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.row-info {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+}
+
+.table-row {
+    display: flex;
+    flex-direction: row;
+    line-height: 26px;
+    gap: 10px;
+    padding: 10px 15px;
+    background-color: white;
+    box-shadow: 0 2px 5px 0px rgba(0, 0, 0, 0.3);
+}
+
+.table-row > div {
+    display: flex;
+    align-items: center;
+}
+
+.more-btn {
+    width: 30px;
+    height: 30px;
+    transform: rotate(90deg);
+    box-sizing: content-box;
+    background: #7f85ff00;
+    background-image: url(assets/more.png);
+    background-size: 24px 24px;  
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: 0.3s all;
+}
+
+.more-btn.active {
+    transform: rotate(0deg);
+}
+
+.line-list, .all-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.all-info {
+    background-color: #F2F2F2;
+    box-shadow: 0 2px 5px 0px rgba(0, 0, 0, 0.3);
+    border-radius: 5px;
+    transition: max-height 1s ease-out;
+    max-height: fit-content;
+}
+
+.more-info {
+    overflow: hidden;
+    transition: max-height .3s ease;
+}
+
+.line-list {
+    padding: 10px 20px 18px;
+    gap: 5px;
+}
+
+.line {
+    font-size: 16px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.line > .name {
+    flex: 0 50%;
+}
+
+.line > .value {
+    display: flex;
+    justify-content: end;
+    gap: 5px;
+    flex: 1 50%;
+    text-align: end;
+}
+
+.loading-table {
+    margin: 10px 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-table p {
+    margin: 0;
+    color: #4d4d4d;
+}

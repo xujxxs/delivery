@@ -1,0 +1,19 @@
+.container-supported-types {
+    margin-top: 5px;
+    display: flex;
+    gap: 5px;
+}
+
+.container-supported-types button {
+    border: 1px solid #7F85FF;
+    background-color: white;
+    color: #7F85FF;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.container-supported-types button:hover {
+    background-color: #7F85FF;
+    color: white;
+}

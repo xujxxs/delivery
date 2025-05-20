@@ -1,0 +1,56 @@
+.form-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5000;
+    backdrop-filter: blur(2px);
+}
+
+.form {
+    overflow-y: scroll;
+    max-height: 70%;
+    max-width: 70%;
+    min-width: 300px;
+    z-index: 5001;
+    padding: 25px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background-color: white;
+    box-shadow: 2px 0 5px 1px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+}
+
+.form h3,
+.form p {
+    margin: 0;
+}
+
+.form h3 {
+    font-weight: 400;
+}
+
+.buttons-controll-form {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.buttons-controll-form button {
+    font-size: 16px;
+    border: 0;
+    padding: 8px 30px;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px 1px rgba(0, 0, 0, 0.3);
+}
+
+button.crup-btn-form {
+    background-color: #7F85FF;
+    color: white;
+}
