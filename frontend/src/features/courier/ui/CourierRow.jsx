@@ -61,7 +61,7 @@ const CourierRow = ({ courier }) => {
                     </div>
                     <div className="line">
                         <div className="name">Стоимость работы:</div>
-                        <div className="value">{(courier.cost*3600).toFixed(2)} ед.в./ч</div>
+                        <div className="value">{(courier.cost).toFixed(2)} ед.в./ч</div>
                     </div>
                     <div className="line">
                         <div className="name">Типы заказов:</div>

@@ -91,7 +91,7 @@ public class CourierService
         updateCourier.setFirstname(updateForm.getFirstname());
         updateCourier.setSurname(updateForm.getSurname());
         updateCourier.setLastname(updateForm.getLastname());
-        updateCourier.setCost(updateForm.getCost());
+        updateCourier.setCost(updateForm.getRealCost());
         updateCourier.setSpeed(updateForm.getSpeed());
         updateCourier.setLoadCapacity(updateForm.getLoadCapacity());
         updateCourier.setSupportedTypeOrders(typeOrderService.safetySaveTypes(updateForm.getSupportedTypeOrders()));

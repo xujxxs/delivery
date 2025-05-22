@@ -11,9 +11,6 @@ const useCreate = () => {
     const createRequest = async (typeObj, data) => {
         setLoading(true);
         try {
-            if(typeObj === "courier") {
-                data.cost = data.cost/3600;
-            }
             const response = await axios.post(`${apiUrl}/${typeObj}`, data);
             setResponseData(response.data);
             addNotification(`Status:${response.status} Объект успешно создан`, "success-notification");

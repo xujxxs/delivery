@@ -2,7 +2,9 @@ package com.uia.delivery.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -58,7 +60,9 @@ public class ScheduleService
     public List<Schedule> getSchedulesByCourierId(Long courierId)
     {
         log.debug("Fetching schedules by courierId: {}", courierId);
-        List<Schedule> ans = scheduleRepository.findByCourierId(courierId);
+        List<Schedule> ans = scheduleRepository.findByCourierId(courierId).stream()
+                .sorted(Comparator.comparing(Schedule::getIndex))
+            .collect(Collectors.toList());
         log.debug("Fetched {} schedules for courier: {}", ans.size(), courierId);
         return ans;
     }

@@ -187,6 +187,12 @@ public class SchedulingAlgorithm
         for(Schedule write : schedule)
         {
             ans += write.getAmountTimeSpent();
+
+            log.debug("DO: {}", write.getDeliveryOrder().getId());
+            log.debug("CP: {}", write.getDeliveryOrder().getClosePeriod());
+            log.debug("ATS: {}", write.getAmountTimeSpent());
+            log.debug("AT: {}", write.getArrivalTime());
+
             if(write.getTypeOperation().equals(TypeOperation.DELIVERY)
                     && write.getArrivalTime().isAfter(write.getDeliveryOrder().getClosePeriod()))
             {

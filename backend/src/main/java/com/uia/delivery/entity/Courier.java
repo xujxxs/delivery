@@ -45,7 +45,7 @@ public class Courier
     private String lastname;
 
     @Column(nullable = false)
-    private Double cost; // Measured in currency per second
+    private Double cost; // Measured in currency per hour
 
     @Column(nullable = false)
     private Double speed; // Measured in km per hour
@@ -76,6 +76,16 @@ public class Courier
     public void setCost(Double cost)
     {
         this.cost = BigDecimal.valueOf(cost).setScale(2, RoundingMode.HALF_UP).doubleValue();
+    }
+
+    public double getCost()
+    {
+        return this.cost / 3600;
+    }
+
+    public double getRealCost()
+    {
+        return this.cost;
     }
 
     public void setSpeed(Double speed)

@@ -57,9 +57,9 @@ const CourierForm = ({ formData, onChange }) => {
                 />
                 <input
                     type="text"
-                    name="middlename"
+                    name="surname"
                     placeholder="Введите отчество (не обязательно)"
-                    value={formData.middlename || ""}
+                    value={formData.surname || ""}
                     onChange={handleInputChange}
                 />
             </div>

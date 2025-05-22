@@ -115,12 +115,18 @@ const CouriersApp = () => {
                     {!loading && (
                         <div className="scroll" style={{ overflowY: 'scroll' }}>
                             <div className="table-body">
-                                {objs.map((courier) => (
-                                    <CourierRow 
-                                        key={courier.id}
-                                        courier={courier} 
-                                    />
-                                ))}
+                                {objs.map((courier) => {
+                                    courier = {
+                                        ...courier,
+                                        cost: courier.cost * 3600
+                                    };
+                                    return (
+                                        <CourierRow 
+                                            key={courier.id}
+                                            courier={courier} 
+                                        />
+                                    );
+                                })}
                             </div>
                         </div>
                     )}

@@ -85,13 +85,13 @@ public class Schedule
     public void calculateOperationTime(LocalTime prevTime)
     {
         double distanceDelivery = positionEnd.distanceTo(positionStart);
-        long secondsToArrive = (long) (distanceDelivery / (courier.getSpeed() / 3600));
+        long secondsToArrive = (long) (distanceDelivery / courier.getSpeed() * 3600);
         this.amountTimeSpent = secondsToArrive;
         
         LocalTime minTimeEndOperation = prevTime.plusSeconds(secondsToArrive);
         if(typeOperation.equals(TypeOperation.PICKUP) 
-                && !minTimeEndOperation.isAfter(deliveryOrder.getOpenPeriod())
-        ) {
+                && !minTimeEndOperation.isAfter(deliveryOrder.getOpenPeriod())) 
+        {
             this.arrivalTime = deliveryOrder.getOpenPeriod();
             return;
         }
